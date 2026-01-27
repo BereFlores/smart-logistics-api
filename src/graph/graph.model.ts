@@ -5,3 +5,10 @@ export interface Edge {
 }
 
 export type Graph = Map<string, Edge[]>
+
+//Temporal storage for graph nodes
+export interface GraphNode {
+  id: string;
+  edges: {from: string; to: string; cost: number }[];
+  graph: Graph;
+}

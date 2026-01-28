@@ -15,20 +15,35 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - edges
  *             properties:
  *               edges:
  *                 type: array
  *                 items:
  *                   type: object
+ *                   required:
+ *                     - from
+ *                     - to
+ *                     - cost
  *                   properties:
  *                     from:
  *                       type: string
+ *                       example: A
  *                     to:
  *                       type: string
+ *                       example: B
  *                     cost:
  *                       type: number
- *             required:
- *               - edges
+ *                       example: 10
+ *                     time:
+ *                       type: number
+ *                       example: 5
+ *                       description: Optional travel time used when preference is "fastest"
+ *                     type:
+ *                       type: string
+ *                       example: highway
+ *                       description: Optional edge type used for constraints (e.g. avoidHighways)
  *     responses:
  *       201:
  *         description: Graph created successfully
@@ -50,9 +65,9 @@ router.post("/upload", uploadGraph);
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: Graph ID
  *     responses:
  *       200:

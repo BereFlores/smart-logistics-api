@@ -8,7 +8,9 @@ const router = Router();
  * /route/optimize/{id}:
  *   post:
  *     summary: Calculates the optimal route between two nodes
- *     description: Returns the shortest path and total cost for a given graph.
+ *     description: >
+ *       Returns the optimized route for a given graph using the selected strategy
+ *       (shortest or fastest) and optional constraints.
  *     parameters:
  *       - in: path
  *         name: id
@@ -22,14 +24,46 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             properties:
- *               originNodeId:
- *                 type: string
- *               destinationNodeId:
- *                 type: string
  *             required:
  *               - originNodeId
  *               - destinationNodeId
+ *               - strategy
+ *             properties:
+ *               originNodeId:
+ *                 type: string
+ *                 example: A
+ *               destinationNodeId:
+ *                 type: string
+ *                 example: D
+ *               strategy:
+ *                 type: string
+ *                 enum: [shortest, fastest]
+ *                 description: Optimization strategy
+ *                 example: shortest
+ *               constraints:
+ *                 type: object
+ *                 description: Optional optimization constraints
+ *                 properties:
+ *                   maxCost:
+ *                     type: number
+ *                     example: 100
+ *                   blockedNodes:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     example: ["C"]
+ *                   blockedEdges:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         from:
+ *                           type: string
+ *                         to:
+ *                           type: string
+ *                     example:
+ *                       - from: B
+ *                         to: C
  *     responses:
  *       200:
  *         description: Optimized route found
@@ -40,6 +74,9 @@ const router = Router();
  *               properties:
  *                 graphId:
  *                   type: string
+ *                 strategy:
+ *                   type: string
+ *                   enum: [shortest, fastest]
  *                 path:
  *                   type: array
  *                   items:
@@ -48,10 +85,10 @@ const router = Router();
  *                   type: number
  *                 durationMs:
  *                   type: number
+ *       400:
+ *         description: Invalid input or missing parameters
  *       404:
  *         description: Graph or path not found
- *       400:
- *         description: Missing origin or destination
  */
 router.post("/optimize/:id", optimizeRoute);
 

@@ -1,6 +1,14 @@
-import type { Graph } from './graph.model.ts';  
+// src/graph/dijkstra.ts
+import type { Graph, Edge } from "./graph.model.js";
 
-export function dijkstra(graph: Graph, start: string, end: string) {
+interface DijkstraOptions {
+  preference?: "shortest" | "fastest";
+  constraints?: Record<string, any>;
+}
+
+export function dijkstra(graph: Graph, start: string, end: string, options: DijkstraOptions = {}) {
+  const { preference = "shortest", constraints = {} } = options;
+
   const distances: Map<string, number> = new Map();
   const previous: Map<string, string | null> = new Map();
   const queue: Set<string> = new Set();
@@ -35,15 +43,20 @@ export function dijkstra(graph: Graph, start: string, end: string) {
         path.unshift(step);
         step = previous.get(step)!;
       }
-      return {distance: distances.get(end)!, path};
+      return { distance: distances.get(end)!, path };
     }
 
     queue.delete(currentNode);
 
-    // Update distances to neighbors
-    const edges = graph.get(currentNode)!;
+    const edges = graph.get(currentNode)!.filter(edge => {
+      // Filter edges based on constraints
+      if (constraints.avoidHighways && edge.type === "highway") return false;
+      return true;
+    });
+
     for (const edge of edges) {
-      const alt = distances.get(currentNode)! + edge.weight;
+      const weight = preference === "fastest" && edge.time !== undefined ? edge.time : edge.weight;
+      const alt = distances.get(currentNode)! + weight;
       if (alt < distances.get(edge.to)!) {
         distances.set(edge.to, alt);
         previous.set(edge.to, currentNode);
@@ -51,5 +64,5 @@ export function dijkstra(graph: Graph, start: string, end: string) {
     }
   }
 
-  return null; // No path found
+  return null;
 }

@@ -3,26 +3,41 @@ import type { Graph, Edge } from "../../graph/graph.model.js";
 import { v4 as uuidv4 } from "uuid";
 
 // Map of graph ID to StoredGraph
-const graphs: Map<string, { id: string; edges: { from: string; to: string; cost: number }[]; graphMap: Graph }> = new Map();
+const graphs: Map<string, { id: string; edges: { from: string; to: string; cost: number, time?: number, type?: string }[]; graphMap: Graph }> = new Map();
 
 // Limit the number of stored graphs to last 5
 function pruneGraphs() {
   if (graphs.size > 5) {
     const oldestKey = graphs.keys().next().value;
-    if (oldestKey !== undefined) {
-      graphs.delete(oldestKey);
-    }
+    if (oldestKey !== undefined) graphs.delete(oldestKey);
   }
 }
 
 // EDGES a GRAPH MAP
-export function buildGraphMap(edges: { from: string; to: string; cost: number }[]): Graph {
+export function buildGraphMap(edges: { from: string; to: string; cost: number; time?: number; type?: string }[]): Graph {
   const map: Graph = new Map();
+
   edges.forEach(edge => {
     if (!map.has(edge.from)) map.set(edge.from, []);
-    map.get(edge.from)?.push({ to: edge.to, weight: edge.cost });
-    if (!map.has(edge.to)) map.set(edge.to, []); // asegura nodo destino
+
+    const graphEdge: Edge = {
+      to: edge.to,
+      weight: edge.cost
+    };
+
+    if (edge.time !== undefined) {
+      graphEdge.time = edge.time;
+    }
+
+    if (edge.type !== undefined) {
+      graphEdge.type = edge.type;
+    }
+
+    map.get(edge.from)!.push(graphEdge);
+
+    if (!map.has(edge.to)) map.set(edge.to, []);
   });
+
   return map;
 }
 
